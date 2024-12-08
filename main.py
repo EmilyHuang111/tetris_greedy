@@ -19,7 +19,7 @@ def main():
         # Load the trained AI model and run the game
         ai_model = CUSTOM_AI_MODEL(weights_path='trained_model.npy')
         game = Game(mode='student', agent=ai_model)
-        game.run_no_visual()
+        game.run()
     else:
         # Handle other modes or run with no AI
         game = Game(mode=mode)
