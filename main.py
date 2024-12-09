@@ -24,7 +24,7 @@ def main():
                 if mode == "student":
                     # Load the trained AI model and run the game
                     try:
-                        ai_model = CUSTOM_AI_MODEL(weights_path='trained_model (2).npy')
+                        ai_model = CUSTOM_AI_MODEL(weights_path='trained_model (4).npy')
                     except FileNotFoundError:
                         print("Trained model not found. Please train the model first.")
                         sys.exit(1)
