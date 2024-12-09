@@ -48,15 +48,15 @@ class CUSTOM_AI_MODEL:
     
         # Define feature functions
         features = {
-            'agg_height': np.sum(peaks),
-            'n_holes': np.sum(holes),
-            'bumpiness': self.get_bumpiness(peaks),
-            'num_pits': np.count_nonzero(np.count_nonzero(board, axis=0) == 0),
-            'max_wells': np.max(wells),
-            'n_cols_with_holes': np.count_nonzero(np.array(holes) > 0),
-            'row_transitions': self.get_row_transition(board, highest_peak),
-            'col_transitions': self.get_col_transition(board, peaks),
-            'cleared': np.count_nonzero(np.mean(board, axis=1))
+            'agg_height': np.sum(peaks),  # Aggregate column heights
+            'n_holes': np.sum(holes),  # Total number of holes
+            'bumpiness': self.get_bumpiness(peaks),  # Difference between column heights
+            'num_pits': np.count_nonzero(np.count_nonzero(board, axis=0) == 0),  # Empty columns
+            'max_wells': np.max(wells),  # Deep wells
+            'n_cols_with_holes': np.count_nonzero(np.array(holes) > 0),  # Columns with holes
+            'row_transitions': self.get_row_transition(board, highest_peak),  # Row transitions
+            'col_transitions': self.get_col_transition(board, peaks),  # Column transitions
+            'cleared': np.count_nonzero(np.mean(board, axis=1))  # Reward for row clearing
         }
     
         # Order the features consistently with the genotype
@@ -72,10 +72,24 @@ class CUSTOM_AI_MODEL:
             features['cleared']
         ])
     
+        # Adjusted weights (genotype) for feature importance
+        self.genotype = np.array([
+            0.5,  # Aggregate height
+            -1.0, # Holes (negative weight to penalize heavily)
+            0.2,  # Bumpiness
+            -0.3, # Pits
+            0.1,  # Max wells
+            -0.4, # Columns with holes
+            0.1,  # Row transitions
+            0.1,  # Column transitions
+            1.0   # Rows cleared (reward)
+        ])
+    
         # Calculate the aggregate score
         aggregate_rating = np.dot(self.genotype, feature_values)
     
         return aggregate_rating
+
     
     def get_best_move(self, board, piece):
         """
