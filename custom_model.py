@@ -78,38 +78,43 @@ class CUSTOM_AI_MODEL:
         return aggregate_rating
     
     def get_best_move(self, board, piece):
-        """
-        Determines the best move by evaluating all possible moves and selecting the one with the highest score.
-        """
-        best_x = -1
-        best_piece = None
-        max_value = -np.inf
-        
-        for rotation in range(4):
-            rotated_piece = piece.get_next_rotation()
-            for x in range(board.width):
-                try:
-                    y = board.drop_height(rotated_piece, x)
-                except Exception:
-                    continue
-                
-                # Simulate placing the piece
-                board_copy = deepcopy(board.board)
-                for pos in rotated_piece.body:
-                    board_copy[y + pos[1]][x + pos[0]] = True
-                
-                # Convert board to numpy array for evaluation
-                np_board = self.bool_to_np(board_copy)
-                
-                # Evaluate the board
-                score = self.valuate(np_board)
-                
-                if score > max_value:
-                    max_value = score
-                    best_x = x
-                    best_piece = rotated_piece
-        
-        return best_x, best_piece
+    """
+    Determines the best move by evaluating all possible placements of the piece
+    using the current AI model's scoring function.
+    """
+    best_x = -1
+    best_piece = None
+    max_score = -np.inf  # Start with the lowest possible score
+
+    for rotation in range(4):  # Explore all 4 rotations
+        rotated_piece = piece.get_next_rotation()
+        for x in range(board.width):  # Explore all horizontal positions
+            try:
+                y = board.drop_height(rotated_piece, x)  # Get drop height for this placement
+            except Exception:
+                continue  # Skip invalid placements
+
+            # Simulate placing the piece
+            board_copy = deepcopy(board)
+            try:
+                board_copy.place(x, y, rotated_piece)
+            except Exception:
+                continue  # Skip if the piece can't be placed
+
+            # Convert the board to a numpy array for evaluation
+            np_board = self.bool_to_np(board_copy.board)
+
+            # Evaluate the board using the AI model
+            score = self.valuate(np_board)
+
+            # Keep track of the best move
+            if score > max_score:
+                max_score = score
+                best_x = x
+                best_piece = deepcopy(rotated_piece)  # Save the best piece configuration
+
+    return best_x, best_piece
+
     
     @staticmethod
     def bool_to_np(board):
